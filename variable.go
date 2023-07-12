@@ -13,3 +13,7 @@ func (lv *Variable) Eval(assignment Assignment) bool {
 	}
 	return val
 }
+
+func (lv Variable) String() string {
+	return lv.Name
+}

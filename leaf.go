@@ -1,5 +1,7 @@
 package logo
 
+import "fmt"
+
 type Leaf bool
 
 func Bottom() Leaf {
@@ -12,4 +14,8 @@ func Top() Leaf {
 
 func (l Leaf) Eval(assignment Assignment) bool {
 	return bool(l)
+}
+
+func (l Leaf) String() string {
+	return fmt.Sprintf("%t", l)
 }

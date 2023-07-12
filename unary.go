@@ -7,3 +7,7 @@ type Not struct {
 func (n Not) Eval(assignment Assignment) bool {
 	return !n.X.Eval(assignment)
 }
+
+func (n Not) String() string {
+	return "!" + n.X.String()
+}
