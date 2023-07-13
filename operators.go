@@ -5,10 +5,10 @@ import "fmt"
 type OpType int
 
 const (
-	AndOp OpType = iota
-	OrOp
-	ImplicationOp
-	EquivalenceOp
+	AndOp OpType = iota // X AND Y
+	OrOp                // X OR Y
+	IfOp                // IF X THEN Y
+	IffOp               // X IFF Y
 )
 
 type BinaryOp struct {
@@ -22,9 +22,9 @@ func (b BinaryOp) Eval(assignment Assignment) bool {
 		return b.X.Eval(assignment) && b.Y.Eval(assignment)
 	case OrOp:
 		return b.X.Eval(assignment) || b.Y.Eval(assignment)
-	case ImplicationOp:
+	case IfOp:
 		return !b.X.Eval(assignment) || b.Y.Eval(assignment)
-	case EquivalenceOp:
+	case IffOp:
 		return (!b.X.Eval(assignment) && !b.Y.Eval(assignment)) || (b.X.Eval(assignment) && b.Y.Eval(assignment))
 	default:
 		panic(fmt.Sprintf("Unknown OpType=%d", b.Op))
@@ -48,9 +48,9 @@ func (b BinaryOp) String() string {
 		return fmt.Sprintf("(%s & %s)", b.X.String(), b.Y.String())
 	case OrOp:
 		return fmt.Sprintf("(%s | %s)", b.X.String(), b.Y.String())
-	case ImplicationOp:
+	case IfOp:
 		return fmt.Sprintf("(%s -> %s)", b.X.String(), b.Y.String())
-	case EquivalenceOp:
+	case IffOp:
 		return fmt.Sprintf("(%s <-> %s)", b.X.String(), b.Y.String())
 	default:
 		panic(fmt.Sprintf("Unknown OpType=%d", b.Op))
