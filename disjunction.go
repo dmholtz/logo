@@ -15,6 +15,16 @@ func (d *Disjunction) Eval(assignment Assignment) bool {
 	return false
 }
 
+func (d *Disjunction) Scope() map[string]struct{} {
+	scope := make(map[string]struct{})
+	for _, disjunct := range d.Disjuncts {
+		for varName := range disjunct.Scope() {
+			scope[varName] = struct{}{}
+		}
+	}
+	return scope
+}
+
 func (d *Disjunction) String() string {
 	// special case: empty disjunction is false
 	if len(d.Disjuncts) == 0 {

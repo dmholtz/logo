@@ -15,6 +15,16 @@ func (c *Conjunction) Eval(assignment Assignment) bool {
 	return true
 }
 
+func (c *Conjunction) Scope() map[string]struct{} {
+	scope := make(map[string]struct{})
+	for _, conjunct := range c.Conjuncts {
+		for varName := range conjunct.Scope() {
+			scope[varName] = struct{}{}
+		}
+	}
+	return scope
+}
+
 func (c *Conjunction) String() string {
 	// special case: empty conjunction is true
 	if len(c.Conjuncts) == 0 {
