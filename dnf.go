@@ -60,7 +60,7 @@ func (b *DnfBuilder) randomNegationWrap(variable Variable) (LogicNode, bool) {
 	if rand.Intn(2) == 0 {
 		return variable, true
 	}
-	return &Not{X: variable}, false
+	return Not(variable), false
 }
 
 // randomLiteral returns a random literal, i.e., a logic variable or its negation
@@ -95,7 +95,7 @@ func (b *DnfBuilder) satConjunction() *Conjunction {
 			if usedPositively {
 				clauses = append(clauses, randVar)
 			} else {
-				clauses = append(clauses, Not{X: &randVar})
+				clauses = append(clauses, Not(&randVar))
 			}
 		}
 	}
@@ -106,7 +106,7 @@ func (b *DnfBuilder) satConjunction() *Conjunction {
 // that contains both a variable and its negation
 func (b *DnfBuilder) unsatConjunction() *Conjunction {
 	randVar := b.randomVariable()
-	negatedVar := Not{X: &Variable{Name: randVar.Name}}
+	negatedVar := Not(&Variable{Name: randVar.Name})
 	clauses := []LogicNode{randVar, negatedVar}
 	for i := 0; i < b.NumClauses-2; i++ {
 		clauses = append(clauses, b.randomLiteral())
