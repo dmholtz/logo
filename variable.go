@@ -7,6 +7,7 @@ type Variable struct {
 	Name string
 }
 
+// Var returns a propositional variable with the given name.
 func Var(name string) LogicNode {
 	return &Variable{Name: name}
 }

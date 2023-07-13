@@ -10,4 +10,5 @@ type LogicNode interface {
 	String() string
 }
 
+// Assignment represents an assignment of truth values to variables.
 type Assignment map[string]bool
