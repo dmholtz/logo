@@ -16,6 +16,22 @@ type BinaryOp struct {
 	Op   OpType
 }
 
+func And(x, y LogicNode) LogicNode {
+	return &BinaryOp{X: x, Y: y, Op: AndOp}
+}
+
+func Or(x, y LogicNode) LogicNode {
+	return &BinaryOp{X: x, Y: y, Op: OrOp}
+}
+
+func If(x, y LogicNode) LogicNode {
+	return &BinaryOp{X: x, Y: y, Op: IfOp}
+}
+
+func Iff(x, y LogicNode) LogicNode {
+	return &BinaryOp{X: x, Y: y, Op: IffOp}
+}
+
 func (b BinaryOp) Eval(assignment Assignment) bool {
 	switch b.Op {
 	case AndOp:

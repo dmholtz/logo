@@ -15,16 +15,16 @@ func TestIsSat(t *testing.T) {
 		assert.False(t, IsSat(Bottom()))
 	})
 	t.Run("A & !A is not satisfiable", func(t *testing.T) {
-		assert.False(t, IsSat(&BinaryOp{Op: AndOp, X: &Variable{Name: "A"}, Y: &Not{X: &Variable{Name: "A"}}}))
+		assert.False(t, IsSat(And(&Variable{Name: "A"}, &Not{X: &Variable{Name: "A"}})))
 	})
 	t.Run("A | !A is satisfiable", func(t *testing.T) {
-		assert.True(t, IsSat(&BinaryOp{Op: OrOp, X: &Variable{Name: "A"}, Y: &Not{X: &Variable{Name: "A"}}}))
+		assert.True(t, IsSat(Or(&Variable{Name: "A"}, &Not{X: &Variable{Name: "A"}})))
 	})
 	t.Run("(A <-> B) & B is satisfiable", func(t *testing.T) {
-		assert.True(t, IsSat(&BinaryOp{Op: AndOp, X: &BinaryOp{Op: IffOp, X: &Variable{Name: "A"}, Y: &Variable{Name: "B"}}, Y: &Variable{Name: "B"}}))
+		assert.True(t, IsSat(And(Iff(&Variable{Name: "A"}, &Variable{Name: "B"}), &Variable{Name: "B"})))
 	})
 	t.Run("(A <-> B) & A & !B is not satisfiable", func(t *testing.T) {
-		assert.False(t, IsSat(&BinaryOp{Op: AndOp, X: &BinaryOp{Op: IffOp, X: &Variable{Name: "A"}, Y: &Variable{Name: "B"}}, Y: &BinaryOp{Op: AndOp, X: &Variable{Name: "A"}, Y: &Not{X: &Variable{Name: "B"}}}}))
+		assert.False(t, IsSat(And(Iff(&Variable{Name: "A"}, &Variable{Name: "B"}), And(&Variable{Name: "A"}, Not{X: &Variable{Name: "B"}}))))
 	})
 	t.Run("large formula is rejected", func(t *testing.T) {
 		clauses := []LogicNode{}
