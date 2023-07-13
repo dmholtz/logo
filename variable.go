@@ -15,7 +15,7 @@ func (lv Variable) Eval(assignment Assignment) bool {
 }
 
 func (v Variable) Scope() map[string]struct{} {
-	return map[string]struct{}{v.Name: struct{}{}}
+	return map[string]struct{}{v.Name: {}}
 }
 
 func (lv Variable) String() string {
