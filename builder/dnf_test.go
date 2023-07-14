@@ -1,7 +1,9 @@
-package logo
+package builder
 
 import (
 	"testing"
+
+	bf "github.com/dmholtz/logo/brute_force"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -54,23 +56,23 @@ func TestSatConjunction(t *testing.T) {
 	t.Run("smallest possible sat conjunction is satisfiable", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(1, 1, 2)
 		conjunction := dnfBuilder.satConjunction()
-		assert.True(t, IsSat(conjunction))
+		assert.True(t, bf.IsSat(conjunction))
 	})
 	t.Run("20 random sat conjunctions are satisfiable", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(6, 2, 4)
 		for i := 0; i < 20; i++ {
 			conjunction := dnfBuilder.satConjunction()
-			if !IsSat(conjunction) {
+			if !bf.IsSat(conjunction) {
 				t.Log(conjunction.String())
 				break
 			}
-			assert.True(t, IsSat(conjunction))
+			assert.True(t, bf.IsSat(conjunction))
 		}
 	})
 	t.Run("large sat conjunction is satisfiable", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(5, 2, 20)
 		conjunction := dnfBuilder.satConjunction()
-		assert.True(t, IsSat(conjunction))
+		assert.True(t, bf.IsSat(conjunction))
 	})
 }
 
@@ -90,13 +92,13 @@ func TestUnsatConjunction(t *testing.T) {
 	t.Run("smallest possible unsat conjunction is unsatisfiable", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(1, 1, 2)
 		conjunction := dnfBuilder.unsatConjunction()
-		assert.False(t, IsSat(conjunction))
+		assert.False(t, bf.IsSat(conjunction))
 	})
 	t.Run("20 random unsat conjunctions are unsatisfiable", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(6, 2, 4)
 		for i := 0; i < 20; i++ {
 			conjunction := dnfBuilder.unsatConjunction()
-			assert.False(t, IsSat(conjunction))
+			assert.False(t, bf.IsSat(conjunction))
 		}
 	})
 }
@@ -118,7 +120,7 @@ func TestSatDnf(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(6, 4, 4)
 		for i := 0; i < 20; i++ {
 			dnf := dnfBuilder.BuildSat()
-			assert.True(t, IsSat(&dnf))
+			assert.True(t, bf.IsSat(&dnf))
 		}
 	})
 }
@@ -140,7 +142,7 @@ func TestUnsatDnf(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(6, 4, 4)
 		for i := 0; i < 20; i++ {
 			dnf := dnfBuilder.BuildUnsat()
-			assert.False(t, IsSat(&dnf))
+			assert.False(t, bf.IsSat(&dnf))
 		}
 	})
 }

@@ -1,9 +1,14 @@
-package logo
+package bruteforce
 
-import "fmt"
+import (
+	"fmt"
+
+	. "github.com/dmholtz/logo"
+)
 
 // IsSat returns true iff the given formula f is satisfiable.
 // It does so by evaluating the formula for all possible assignments.
+//
 // The runtime of this approach is exponential and thus only feasible
 // for small formulas.
 func IsSat(f LogicNode) bool {
