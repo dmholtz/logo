@@ -1,10 +1,12 @@
-package logo
+package bruteforce
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	. "github.com/dmholtz/logo"
 )
 
 func TestIsSat(t *testing.T) {

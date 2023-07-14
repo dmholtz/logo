@@ -1,12 +1,16 @@
-package logo
+package bruteforce
 
-import "fmt"
+import (
+	"fmt"
 
-// IsSat returns true iff the given formula f is satisfiable.
+	. "github.com/dmholtz/logo"
+)
+
+// IsTaut returns true iff the given formula f is a tautology.
 // It does so by evaluating the formula for all possible assignments.
 // The runtime of this approach is exponential and thus only feasible
 // for small formulas.
-func IsSat(f LogicNode) bool {
+func IsTaut(f LogicNode) bool {
 	scope := f.Scope()
 
 	if len(scope) == 0 {
@@ -36,9 +40,9 @@ func IsSat(f LogicNode) bool {
 			assignment[varName] = logicValue
 		}
 
-		if f.Eval(assignment) {
-			return true
+		if !f.Eval(assignment) {
+			return false
 		}
 	}
-	return false
+	return true
 }

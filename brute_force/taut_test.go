@@ -1,8 +1,10 @@
-package logo
+package bruteforce
 
 import (
 	"fmt"
 	"testing"
+
+	. "github.com/dmholtz/logo"
 
 	"github.com/stretchr/testify/assert"
 )
