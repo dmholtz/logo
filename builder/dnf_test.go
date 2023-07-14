@@ -1,7 +1,9 @@
-package logo
+package builder
 
 import (
 	"testing"
+
+	. "github.com/dmholtz/logo"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -1,8 +1,10 @@
-package logo
+package builder
 
 import (
 	"fmt"
 	"math/rand"
+
+	. "github.com/dmholtz/logo"
 )
 
 type DnfBuilder struct {
