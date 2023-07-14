@@ -16,16 +16,24 @@ func IsSat(f LogicNode) bool {
 		panic(fmt.Sprintf("Too many variables in formula f=%s: %d > 31", f, len(scope)))
 	}
 
+	// iteration over map keys is non-deterministic, so we need to create a deterministic
+	// mapping from bit indices to variable names
+	bitIdxToVarName := make(map[uint32]string)
+	var bitIdx uint32 = 0
+	for varName := range scope {
+		bitIdxToVarName[bitIdx] = varName
+		bitIdx++
+	}
+
 	// codeded_assignment is a bit vector that encodes an assignment
 	var coded_assignment uint32 = 0
 	for ; coded_assignment < (1 << len(scope)); coded_assignment++ {
 		assignment := make(Assignment)
 
-		var bit_idx uint32 = 0
-		for varName := range scope {
-			logicValue := ((coded_assignment >> bit_idx) & 1) == 1
+		for i := uint32(0); i < uint32(len(scope)); i++ {
+			varName := bitIdxToVarName[i]
+			logicValue := ((coded_assignment >> i) & 1) == 1
 			assignment[varName] = logicValue
-			bit_idx++
 		}
 
 		if f.Eval(assignment) {
