@@ -49,6 +49,60 @@ func TestDeMorganExpand(t *testing.T) {
 		// assert that the result is semantically equivalent to the input
 		assert.True(t, bf.IsEquiv(f, result))
 	})
+	t.Run("!(A & B & C) expands to !A | !B | !C", func(t *testing.T) {
+		f := Not(NewConjunction(Var("A"), Var("B"), Var("C")))
+
+		// assert that DeMorgan's law is applied
+		result, ok := DeMorganExpand(f)
+		assert.True(t, ok)
+
+		// assert that the result is a disjunction
+		disj, typeOk := result.(*Disjunction)
+		assert.True(t, typeOk)
+
+		// assert that all subnodes are negated
+		for _, subnode := range disj.Disjuncts {
+			_, typeOk = subnode.(*NotOp)
+			assert.True(t, typeOk)
+		}
+
+		// assert that the result is semantically equivalent to the input
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("!(A | B | C) expands to !A & !B & !C", func(t *testing.T) {
+		f := Not(NewDisjunction(Var("A"), Var("B"), Var("C")))
+
+		// assert that DeMorgan's law is applied
+		result, ok := DeMorganExpand(f)
+		assert.True(t, ok)
+
+		// assert that the result is a conjunction
+		conj, typeOk := result.(*Conjunction)
+		assert.True(t, typeOk)
+
+		// assert that all subnodes are negated
+		for _, subnode := range conj.Conjuncts {
+			_, typeOk = subnode.(*NotOp)
+			assert.True(t, typeOk)
+		}
+
+		// assert that the result is semantically equivalent to the input
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("empty conjunction !(&) expands to (|)", func(t *testing.T) {
+		f := Not(NewConjunction())
+
+		// assert that DeMorgan's law is applied
+		result, ok := DeMorganExpand(f)
+		assert.True(t, ok)
+
+		// assert that the result is a disjunction
+		_, typeOk := result.(*Disjunction)
+		assert.True(t, typeOk)
+
+		// assert that the result is semantically equivalent to the input
+		assert.True(t, bf.IsEquiv(f, result))
+	})
 	t.Run("!(A -> B) is not expanded", func(t *testing.T) {
 		f := Not(Implies(Var("A"), Var("B")))
 
@@ -162,6 +216,42 @@ func TestDeMorganContract(t *testing.T) {
 		// assert that the result is semantically equivalent to the input
 		assert.True(t, bf.IsEquiv(f, result))
 	})
+	t.Run("(!A & !B & !C) contracts to !(A | B | C)", func(t *testing.T) {
+		f := NewConjunction(Not(Var("A")), Not(Var("B")), Not(Var("C")))
+
+		// assert that DeMorgan's law is applied
+		result, ok := DeMorganContract(f)
+		assert.True(t, ok)
+
+		// assert that the result is a negated binary op
+		notOp, isNot := result.(*NotOp)
+		assert.True(t, isNot)
+
+		// assert that argument of the negation is a disjunction
+		_, isDisjunction := notOp.X.(*Disjunction)
+		assert.True(t, isDisjunction)
+
+		// assert that the result is semantically equivalent to the input
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("(!A | !B | !C) contracts to !(A & B & C)", func(t *testing.T) {
+		f := NewDisjunction(Not(Var("A")), Not(Var("B")), Not(Var("C")))
+
+		// assert that DeMorgan's law is applied
+		result, ok := DeMorganContract(f)
+		assert.True(t, ok)
+
+		// assert that the result is a negated binary op
+		notOp, isNot := result.(*NotOp)
+		assert.True(t, isNot)
+
+		// assert that argument of the negation is a conjunction
+		_, isConjunction := notOp.X.(*Conjunction)
+		assert.True(t, isConjunction)
+
+		// assert that the result is semantically equivalent to the input
+		assert.True(t, bf.IsEquiv(f, result))
+	})
 	t.Run("(A & !B) is not contracted", func(t *testing.T) {
 		f := And(Var("A"), Not(Var("B")))
 
@@ -174,6 +264,26 @@ func TestDeMorganContract(t *testing.T) {
 	})
 	t.Run("(A! -> B) is not contracted", func(t *testing.T) {
 		f := Implies(Not(Var("A")), Var("B"))
+
+		// assert that DeMorgan's law is not applied
+		result, ok := DeMorganContract(f)
+		assert.False(t, ok)
+
+		// assert that the result is the same as the input
+		assert.Equal(t, f, result)
+	})
+	t.Run("(A & !B & !C) is not contracted", func(t *testing.T) {
+		f := NewConjunction(Var("A"), Not(Var("B")), Not(Var("C")))
+
+		// assert that DeMorgan's law is not applied
+		result, ok := DeMorganContract(f)
+		assert.False(t, ok)
+
+		// assert that the result is the same as the input
+		assert.Equal(t, f, result)
+	})
+	t.Run("(A | !B | !C) is not contracted", func(t *testing.T) {
+		f := NewDisjunction(Var("A"), Not(Var("B")), Not(Var("C")))
 
 		// assert that DeMorgan's law is not applied
 		result, ok := DeMorganContract(f)
@@ -219,6 +329,42 @@ func TestDeMorganContractEager(t *testing.T) {
 
 		// assert that the binary op is a disjunction
 		assert.Equal(t, OrOp, binOp.Op)
+
+		// assert that the result is semantically equivalent to the input
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("(A & !B & !C) contracts to !(!A | B | C)", func(t *testing.T) {
+		f := NewConjunction(Var("A"), Not(Var("B")), Not(Var("C")))
+
+		// assert that DeMorgan's law is applied
+		result, ok := DeMorganContractEager(f)
+		assert.True(t, ok)
+
+		// assert that the result is a negated binary op
+		notOp, isNot := result.(*NotOp)
+		assert.True(t, isNot)
+
+		// assert that the argument of the negation is a disjunction
+		_, isDisjunction := notOp.X.(*Disjunction)
+		assert.True(t, isDisjunction)
+
+		// assert that the result is semantically equivalent to the input
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("(A | !B | !C) contracts to !(!A & B & C)", func(t *testing.T) {
+		f := NewDisjunction(Var("A"), Not(Var("B")), Not(Var("C")))
+
+		// assert that DeMorgan's law is applied
+		result, ok := DeMorganContractEager(f)
+		assert.True(t, ok)
+
+		// assert that the result is a negated binary op
+		notOp, isNot := result.(*NotOp)
+		assert.True(t, isNot)
+
+		// assert that the argument of the negation is a conjunction
+		_, isConjunction := notOp.X.(*Conjunction)
+		assert.True(t, isConjunction)
 
 		// assert that the result is semantically equivalent to the input
 		assert.True(t, bf.IsEquiv(f, result))

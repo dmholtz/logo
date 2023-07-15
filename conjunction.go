@@ -6,6 +6,10 @@ type Conjunction struct {
 	Conjuncts []LogicNode
 }
 
+func NewConjunction(conjuncts ...LogicNode) *Conjunction {
+	return &Conjunction{conjuncts}
+}
+
 func (c *Conjunction) Eval(assignment Assignment) bool {
 	for _, conjunct := range c.Conjuncts {
 		if !conjunct.Eval(assignment) {

@@ -15,9 +15,17 @@ func DeMorganExpand(f LogicNode) (LogicNode, bool) {
 				return And(Not(child.X), Not(child.Y)), true
 			}
 		case *Conjunction:
-			// TODO: implement
+			disjunction := NewDisjunction()
+			for _, clause := range child.Conjuncts {
+				disjunction.Disjuncts = append(disjunction.Disjuncts, Not(clause))
+			}
+			return disjunction, true
 		case *Disjunction:
-			// TODO: implement
+			conjunction := NewConjunction()
+			for _, clause := range child.Disjuncts {
+				conjunction.Conjuncts = append(conjunction.Conjuncts, Not(clause))
+			}
+			return conjunction, true
 		default:
 		}
 	}
@@ -43,27 +51,38 @@ func DeMorganExpandEager(f LogicNode) (LogicNode, bool) {
 // DeMorganContract contracts a conjunction / disjunction of negated clauses into a negated
 // disjunction / conjunction by applying DeMorgan's rule if possible.
 func DeMorganContract(f LogicNode) (LogicNode, bool) {
-	if binOp, ok := f.(*BinaryOp); ok {
-		switch binOp.Op {
-		case AndOp:
-			if not1, ok := binOp.X.(*NotOp); ok {
-				if not2, ok := binOp.Y.(*NotOp); ok {
-					return Not(Or(not1.X, not2.X)), true
-				}
-			}
-		case OrOp:
-			if not1, ok := binOp.X.(*NotOp); ok {
-				if not2, ok := binOp.Y.(*NotOp); ok {
-					return Not(And(not1.X, not2.X)), true
-				}
+	switch operator := f.(type) {
+	case *BinaryOp:
+		not1, isNot1 := operator.X.(*NotOp)
+		not2, isNot2 := operator.Y.(*NotOp)
+		if isNot1 && isNot2 {
+			switch operator.Op {
+			case AndOp:
+				return Not(Or(not1.X, not2.X)), true
+			case OrOp:
+				return Not(And(not1.X, not2.X)), true
 			}
 		}
-	} else if conj, ok := f.(*Conjunction); ok {
-		conj = conj
-		// TODO: implement
-	} else if disj, ok := f.(*Disjunction); ok {
-		disj = disj
-		// TODO: implement
+	case *Conjunction:
+		disjunction := NewDisjunction()
+		for _, clause := range operator.Conjuncts {
+			if not, isNot := clause.(*NotOp); isNot {
+				disjunction.Disjuncts = append(disjunction.Disjuncts, not.X)
+			} else {
+				return f, false
+			}
+		}
+		return Not(disjunction), true
+	case *Disjunction:
+		conjunction := NewConjunction()
+		for _, clause := range operator.Disjuncts {
+			if not, isNot := clause.(*NotOp); isNot {
+				conjunction.Conjuncts = append(conjunction.Conjuncts, not.X)
+			} else {
+				return f, false
+			}
+		}
+		return Not(conjunction), true
 	}
 	return f, false
 }
@@ -71,8 +90,9 @@ func DeMorganContract(f LogicNode) (LogicNode, bool) {
 // DeMorganContractEager works like DeMorganContract but is more eagerly, i.e., it may in addition
 // apply double negation on clauses to contract formulas like (A & !B) where DeMorganContract would fail.
 func DeMorganContractEager(f LogicNode) (LogicNode, bool) {
-	if binOp, ok := f.(*BinaryOp); ok {
-		xOperand, yOperand := binOp.X, binOp.Y
+	switch operator := f.(type) {
+	case *BinaryOp:
+		xOperand, yOperand := operator.X, operator.Y
 		if not1, isNot := xOperand.(*NotOp); !isNot {
 			xOperand = Not(xOperand)
 		} else {
@@ -83,18 +103,34 @@ func DeMorganContractEager(f LogicNode) (LogicNode, bool) {
 		} else {
 			yOperand = not2.X
 		}
-		switch binOp.Op {
+		switch operator.Op {
 		case AndOp:
 			return Not(Or(xOperand, yOperand)), true
 		case OrOp:
 			return Not(And(xOperand, yOperand)), true
 		}
-	} else if conj, ok := f.(*Conjunction); ok {
-		conj = conj
-		// TODO: implement
-	} else if disj, ok := f.(*Disjunction); ok {
-		disj = disj
-		// TODO: implement
+	case *Conjunction:
+		disjunction := NewDisjunction()
+		for _, clause := range operator.Conjuncts {
+			if not, isNot := clause.(*NotOp); isNot {
+				disjunction.Disjuncts = append(disjunction.Disjuncts, not.X)
+			} else {
+				// apply double negation
+				disjunction.Disjuncts = append(disjunction.Disjuncts, Not(clause))
+			}
+		}
+		return Not(disjunction), true
+	case *Disjunction:
+		conjunction := NewConjunction()
+		for _, clause := range operator.Disjuncts {
+			if not, isNot := clause.(*NotOp); isNot {
+				conjunction.Conjuncts = append(conjunction.Conjuncts, not.X)
+			} else {
+				// apply double negation
+				conjunction.Conjuncts = append(conjunction.Conjuncts, Not(clause))
+			}
+		}
+		return Not(conjunction), true
 	}
 	return f, false
 }

@@ -6,6 +6,10 @@ type Disjunction struct {
 	Disjuncts []LogicNode
 }
 
+func NewDisjunction(disjuncts ...LogicNode) *Disjunction {
+	return &Disjunction{Disjuncts: disjuncts}
+}
+
 func (d *Disjunction) Eval(assignment Assignment) bool {
 	for _, disjunct := range d.Disjuncts {
 		if disjunct.Eval(assignment) {
