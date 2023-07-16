@@ -91,9 +91,10 @@ func TestCombineOr(t *testing.T) {
 		assert.True(t, ok)
 
 		// assert that the result is a disjunction of correct length
-		disjunction, ok := result.(*Disjunction)
+		disjunction, ok := result.(*NaryOp)
 		assert.True(t, ok)
-		assert.Equal(t, 3, len(disjunction.Disjuncts))
+		assert.Equal(t, disjunction.Op, OrOp)
+		assert.Equal(t, 3, len(disjunction.Clauses))
 
 		// assert that the result is equivalent to the original expression
 		assert.True(t, bf.IsEquiv(f, result))
@@ -106,9 +107,10 @@ func TestCombineOr(t *testing.T) {
 		assert.True(t, ok)
 
 		// assert that the result is a disjunction of correct length
-		disjunction, ok := result.(*Disjunction)
+		disjunction, ok := result.(*NaryOp)
 		assert.True(t, ok)
-		assert.Equal(t, 4, len(disjunction.Disjuncts))
+		assert.Equal(t, disjunction.Op, OrOp)
+		assert.Equal(t, 4, len(disjunction.Clauses))
 
 		// assert that the result is equivalent to the original expression
 		assert.True(t, bf.IsEquiv(f, result))
@@ -121,9 +123,10 @@ func TestCombineOr(t *testing.T) {
 		assert.True(t, ok)
 
 		// assert that the result is a disjunction of correct length
-		disjunction, ok := result.(*Disjunction)
+		disjunction, ok := result.(*NaryOp)
 		assert.True(t, ok)
-		assert.Equal(t, 4, len(disjunction.Disjuncts))
+		assert.Equal(t, disjunction.Op, OrOp)
+		assert.Equal(t, 4, len(disjunction.Clauses))
 
 		// assert that the result is equivalent to the original expression
 		assert.True(t, bf.IsEquiv(f, result))
@@ -136,9 +139,10 @@ func TestCombineOr(t *testing.T) {
 		assert.True(t, ok)
 
 		// assert that the result is a disjunction of correct length
-		disjunction, ok := result.(*Disjunction)
+		disjunction, ok := result.(*NaryOp)
 		assert.True(t, ok)
-		assert.Equal(t, 2, len(disjunction.Disjuncts))
+		assert.Equal(t, disjunction.Op, OrOp)
+		assert.Equal(t, 2, len(disjunction.Clauses))
 
 		// assert that the result is equivalent to the original expression
 		assert.True(t, bf.IsEquiv(f, result))

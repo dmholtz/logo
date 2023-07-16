@@ -35,21 +35,21 @@ func NewDnfBuilder(numVariables int, numConjunctions, numClauses int) *DnfBuilde
 }
 
 // BuildSat returns a disjunction of conjunctions that is satisfiable
-func (b *DnfBuilder) BuildSat() Disjunction {
+func (b *DnfBuilder) BuildSat() NaryOp {
 	conjunctions := []LogicNode{b.satConjunction()}
 	for i := 1; i < b.NumConjunctions; i++ {
 		conjunctions = append(conjunctions, b.randomConjunction())
 	}
-	return Disjunction{Disjuncts: conjunctions}
+	return NaryOp{Clauses: conjunctions, Op: OrOp}
 }
 
 // BuildUnsat returns a disjunction of conjunctions that is not satisfiable
-func (b *DnfBuilder) BuildUnsat() Disjunction {
+func (b *DnfBuilder) BuildUnsat() NaryOp {
 	conjunctions := make([]LogicNode, 0)
 	for i := 0; i < b.NumConjunctions; i++ {
 		conjunctions = append(conjunctions, b.unsatConjunction())
 	}
-	return Disjunction{Disjuncts: conjunctions}
+	return NaryOp{Clauses: conjunctions, Op: OrOp}
 }
 
 // randomVariable returns a random logic variable

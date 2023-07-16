@@ -18,7 +18,7 @@ func DeMorganExpand(f LogicNode) (LogicNode, bool) {
 			if child.Op == AndOp {
 				disjunction := NewDisjunction()
 				for _, clause := range child.Clauses {
-					disjunction.Disjuncts = append(disjunction.Disjuncts, Not(clause))
+					disjunction.Clauses = append(disjunction.Clauses, Not(clause))
 				}
 				return disjunction, true
 			}
@@ -29,12 +29,6 @@ func DeMorganExpand(f LogicNode) (LogicNode, bool) {
 				}
 				return conjunction, true
 			}
-		case *Disjunction:
-			conjunction := NewConjunction()
-			for _, clause := range child.Disjuncts {
-				conjunction.Clauses = append(conjunction.Clauses, Not(clause))
-			}
-			return conjunction, true
 		default:
 		}
 	}
@@ -77,23 +71,24 @@ func DeMorganContract(f LogicNode) (LogicNode, bool) {
 			disjunction := NewDisjunction()
 			for _, clause := range operator.Clauses {
 				if not, isNot := clause.(*NotOp); isNot {
-					disjunction.Disjuncts = append(disjunction.Disjuncts, not.X)
+					disjunction.Clauses = append(disjunction.Clauses, not.X)
 				} else {
 					return f, false
 				}
 			}
 			return Not(disjunction), true
 		}
-	case *Disjunction:
-		conjunction := NewConjunction()
-		for _, clause := range operator.Disjuncts {
-			if not, isNot := clause.(*NotOp); isNot {
-				conjunction.Clauses = append(conjunction.Clauses, not.X)
-			} else {
-				return f, false
+		if operator.Op == OrOp {
+			conjunction := NewConjunction()
+			for _, clause := range operator.Clauses {
+				if not, isNot := clause.(*NotOp); isNot {
+					conjunction.Clauses = append(conjunction.Clauses, not.X)
+				} else {
+					return f, false
+				}
 			}
+			return Not(conjunction), true
 		}
-		return Not(conjunction), true
 	}
 	return f, false
 }
@@ -125,25 +120,26 @@ func DeMorganContractEager(f LogicNode) (LogicNode, bool) {
 			disjunction := NewDisjunction()
 			for _, clause := range operator.Clauses {
 				if not, isNot := clause.(*NotOp); isNot {
-					disjunction.Disjuncts = append(disjunction.Disjuncts, not.X)
+					disjunction.Clauses = append(disjunction.Clauses, not.X)
 				} else {
 					// apply double negation
-					disjunction.Disjuncts = append(disjunction.Disjuncts, Not(clause))
+					disjunction.Clauses = append(disjunction.Clauses, Not(clause))
 				}
 			}
 			return Not(disjunction), true
 		}
-	case *Disjunction:
-		conjunction := NewConjunction()
-		for _, clause := range operator.Disjuncts {
-			if not, isNot := clause.(*NotOp); isNot {
-				conjunction.Clauses = append(conjunction.Clauses, not.X)
-			} else {
-				// apply double negation
-				conjunction.Clauses = append(conjunction.Clauses, Not(clause))
+		if operator.Op == OrOp {
+			conjunction := NewConjunction()
+			for _, clause := range operator.Clauses {
+				if not, isNot := clause.(*NotOp); isNot {
+					conjunction.Clauses = append(conjunction.Clauses, not.X)
+				} else {
+					// apply double negation
+					conjunction.Clauses = append(conjunction.Clauses, Not(clause))
+				}
 			}
+			return Not(conjunction), true
 		}
-		return Not(conjunction), true
 	}
 	return f, false
 }

@@ -56,15 +56,19 @@ func CombineOr(f LogicNode) (LogicNode, bool) {
 		switch n := node.(type) {
 		case *BinaryOp:
 			if n.Op == OrOp {
-				disjunction.Disjuncts = append(disjunction.Disjuncts, n.X)
-				disjunction.Disjuncts = append(disjunction.Disjuncts, n.Y)
+				disjunction.Clauses = append(disjunction.Clauses, n.X)
+				disjunction.Clauses = append(disjunction.Clauses, n.Y)
 			} else {
-				disjunction.Disjuncts = append(disjunction.Disjuncts, n)
+				disjunction.Clauses = append(disjunction.Clauses, n)
 			}
-		case *Disjunction:
-			disjunction.Disjuncts = append(disjunction.Disjuncts, n.Disjuncts...)
+		case *NaryOp:
+			if n.Op == OrOp {
+				disjunction.Clauses = append(disjunction.Clauses, n.Clauses...)
+			} else {
+				disjunction.Clauses = append(disjunction.Clauses, n)
+			}
 		default:
-			disjunction.Disjuncts = append(disjunction.Disjuncts, n)
+			disjunction.Clauses = append(disjunction.Clauses, n)
 		}
 	}
 
@@ -75,11 +79,13 @@ func CombineOr(f LogicNode) (LogicNode, bool) {
 			extendDisjunction(operator.Y)
 			return disjunction, true
 		}
-	case *Disjunction:
-		for _, disjunct := range operator.Disjuncts {
-			extendDisjunction(disjunct)
+	case *NaryOp:
+		if operator.Op == OrOp {
+			for _, disjunct := range operator.Clauses {
+				extendDisjunction(disjunct)
+			}
+			return disjunction, true
 		}
-		return disjunction, true
 	}
 	return f, false
 }
@@ -88,26 +94,29 @@ func CombineOr(f LogicNode) (LogicNode, bool) {
 func SplitNary(f LogicNode) (LogicNode, bool) {
 	switch operator := f.(type) {
 	case *NaryOp:
-		if len(operator.Clauses) > 1 {
-			rest, _ := SplitNary(NewConjunction(operator.Clauses[1:]...))
-			return And(operator.Clauses[0], rest), true
+		if operator.Op == AndOp {
+			if len(operator.Clauses) > 1 {
+				rest, _ := SplitNary(NewConjunction(operator.Clauses[1:]...))
+				return And(operator.Clauses[0], rest), true
+			}
+			if len(operator.Clauses) == 1 {
+				return operator.Clauses[0], true
+			}
+			if len(operator.Clauses) == 0 {
+				return Top(), true
+			}
 		}
-		if len(operator.Clauses) == 1 {
-			return operator.Clauses[0], true
-		}
-		if len(operator.Clauses) == 0 {
-			return Top(), true
-		}
-	case *Disjunction:
-		if len(operator.Disjuncts) > 1 {
-			rest, _ := SplitNary(NewDisjunction(operator.Disjuncts[1:]...))
-			return Or(operator.Disjuncts[0], rest), true
-		}
-		if len(operator.Disjuncts) == 1 {
-			return operator.Disjuncts[0], true
-		}
-		if len(operator.Disjuncts) == 0 {
-			return Bottom(), true
+		if operator.Op == OrOp {
+			if len(operator.Clauses) > 1 {
+				rest, _ := SplitNary(NewDisjunction(operator.Clauses[1:]...))
+				return Or(operator.Clauses[0], rest), true
+			}
+			if len(operator.Clauses) == 1 {
+				return operator.Clauses[0], true
+			}
+			if len(operator.Clauses) == 0 {
+				return Bottom(), true
+			}
 		}
 	}
 	return f, false

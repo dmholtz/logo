@@ -58,6 +58,10 @@ func NewConjunction(clauses ...LogicNode) *NaryOp {
 	return &NaryOp{Clauses: clauses, Op: AndOp}
 }
 
+func NewDisjunction(disjuncts ...LogicNode) *NaryOp {
+	return &NaryOp{Clauses: disjuncts, Op: OrOp}
+}
+
 func (op OpType) String() string {
 	switch op {
 	case AndOp:
