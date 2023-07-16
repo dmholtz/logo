@@ -4,87 +4,44 @@ import (
 	. "github.com/dmholtz/logo"
 )
 
-// CombineAnd combines a tree of nested Ands into a single conjunction by applying the associativity rule.
+// CombineAnd combines a tree of nested ANDs or ORs into a single n-ary operator by applying the associativity rule.
 // Associativity: (A & B) & C = A & (B & C) = A & B & C
-func CombineAnd(f LogicNode) (LogicNode, bool) {
-	conjunction := NewConjunction()
-
-	extendConjunction := func(node LogicNode) {
-		switch n := node.(type) {
-		case *BinaryOp:
-			if n.Op == AndOp {
-				conjunction.Clauses = append(conjunction.Clauses, n.X)
-				conjunction.Clauses = append(conjunction.Clauses, n.Y)
-			} else {
-				conjunction.Clauses = append(conjunction.Clauses, n)
-			}
-		case *NaryOp:
-			if n.Op == AndOp {
-				conjunction.Clauses = append(conjunction.Clauses, n.Clauses...)
-			} else {
-				conjunction.Clauses = append(conjunction.Clauses, n)
-			}
-		default:
-			conjunction.Clauses = append(conjunction.Clauses, n)
-		}
-	}
-
-	switch operator := f.(type) {
-	case *BinaryOp:
-		if operator.Op == AndOp {
-			extendConjunction(operator.X)
-			extendConjunction(operator.Y)
-			return conjunction, true
-		}
-	case *NaryOp:
-		if operator.Op == AndOp {
-			for _, conjunct := range operator.Clauses {
-				extendConjunction(conjunct)
-			}
-			return conjunction, true
-		}
-	}
-	return f, false
-}
-
-// CombineOr combines a tree of nested Ors into a single disjunction by applying the associativity rule.
 // Associativity: (A | B) | C = A | (B | C) = A | B | C
-func CombineOr(f LogicNode) (LogicNode, bool) {
-	disjunction := NewDisjunction()
+func Combine(f LogicNode) (LogicNode, bool) {
+	naryOp := NaryOp{}
 
-	extendDisjunction := func(node LogicNode) {
+	extendClauses := func(node LogicNode, opType OpType) {
 		switch n := node.(type) {
 		case *BinaryOp:
-			if n.Op == OrOp {
-				disjunction.Clauses = append(disjunction.Clauses, n.X)
-				disjunction.Clauses = append(disjunction.Clauses, n.Y)
-			} else {
-				disjunction.Clauses = append(disjunction.Clauses, n)
+			if n.Op == opType {
+				naryOp.Clauses = append(naryOp.Clauses, n.X)
+				naryOp.Clauses = append(naryOp.Clauses, n.Y)
+				return
 			}
 		case *NaryOp:
-			if n.Op == OrOp {
-				disjunction.Clauses = append(disjunction.Clauses, n.Clauses...)
-			} else {
-				disjunction.Clauses = append(disjunction.Clauses, n)
+			if n.Op == opType {
+				naryOp.Clauses = append(naryOp.Clauses, n.Clauses...)
+				return
 			}
-		default:
-			disjunction.Clauses = append(disjunction.Clauses, n)
 		}
+		naryOp.Clauses = append(naryOp.Clauses, node)
 	}
 
 	switch operator := f.(type) {
 	case *BinaryOp:
-		if operator.Op == OrOp {
-			extendDisjunction(operator.X)
-			extendDisjunction(operator.Y)
-			return disjunction, true
+		if operator.Op == AndOp || operator.Op == OrOp {
+			naryOp.Op = operator.Op
+			extendClauses(operator.X, naryOp.Op)
+			extendClauses(operator.Y, naryOp.Op)
+			return &naryOp, true
 		}
 	case *NaryOp:
-		if operator.Op == OrOp {
-			for _, disjunct := range operator.Clauses {
-				extendDisjunction(disjunct)
+		if operator.Op == AndOp || operator.Op == OrOp {
+			naryOp.Op = operator.Op
+			for _, clause := range operator.Clauses {
+				extendClauses(clause, naryOp.Op)
 			}
-			return disjunction, true
+			return &naryOp, true
 		}
 	}
 	return f, false
@@ -94,29 +51,24 @@ func CombineOr(f LogicNode) (LogicNode, bool) {
 func SplitNary(f LogicNode) (LogicNode, bool) {
 	switch operator := f.(type) {
 	case *NaryOp:
+		if len(operator.Clauses) == 0 && operator.Op == AndOp {
+			return Top(), true
+		}
+		if len(operator.Clauses) == 0 && operator.Op == OrOp {
+			return Bottom(), true
+		}
+		if len(operator.Clauses) == 1 {
+			return operator.Clauses[0], true
+		}
+
+		// len(operator.Clauses) > 1
 		if operator.Op == AndOp {
-			if len(operator.Clauses) > 1 {
-				rest, _ := SplitNary(NewConjunction(operator.Clauses[1:]...))
-				return And(operator.Clauses[0], rest), true
-			}
-			if len(operator.Clauses) == 1 {
-				return operator.Clauses[0], true
-			}
-			if len(operator.Clauses) == 0 {
-				return Top(), true
-			}
+			rest, _ := SplitNary(NewConjunction(operator.Clauses[1:]...))
+			return And(operator.Clauses[0], rest), true
 		}
 		if operator.Op == OrOp {
-			if len(operator.Clauses) > 1 {
-				rest, _ := SplitNary(NewDisjunction(operator.Clauses[1:]...))
-				return Or(operator.Clauses[0], rest), true
-			}
-			if len(operator.Clauses) == 1 {
-				return operator.Clauses[0], true
-			}
-			if len(operator.Clauses) == 0 {
-				return Bottom(), true
-			}
+			rest, _ := SplitNary(NewDisjunction(operator.Clauses[1:]...))
+			return Or(operator.Clauses[0], rest), true
 		}
 	}
 	return f, false
