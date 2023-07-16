@@ -14,16 +14,25 @@ func DeMorganExpand(f LogicNode) (LogicNode, bool) {
 			if child.Op == OrOp {
 				return And(Not(child.X), Not(child.Y)), true
 			}
-		case *Conjunction:
-			disjunction := NewDisjunction()
-			for _, clause := range child.Conjuncts {
-				disjunction.Disjuncts = append(disjunction.Disjuncts, Not(clause))
+		case *NaryOp:
+			if child.Op == AndOp {
+				disjunction := NewDisjunction()
+				for _, clause := range child.Clauses {
+					disjunction.Disjuncts = append(disjunction.Disjuncts, Not(clause))
+				}
+				return disjunction, true
 			}
-			return disjunction, true
+			if child.Op == OrOp {
+				conjunction := NewConjunction()
+				for _, clause := range child.Clauses {
+					conjunction.Clauses = append(conjunction.Clauses, Not(clause))
+				}
+				return conjunction, true
+			}
 		case *Disjunction:
 			conjunction := NewConjunction()
 			for _, clause := range child.Disjuncts {
-				conjunction.Conjuncts = append(conjunction.Conjuncts, Not(clause))
+				conjunction.Clauses = append(conjunction.Clauses, Not(clause))
 			}
 			return conjunction, true
 		default:
@@ -63,21 +72,23 @@ func DeMorganContract(f LogicNode) (LogicNode, bool) {
 				return Not(And(not1.X, not2.X)), true
 			}
 		}
-	case *Conjunction:
-		disjunction := NewDisjunction()
-		for _, clause := range operator.Conjuncts {
-			if not, isNot := clause.(*NotOp); isNot {
-				disjunction.Disjuncts = append(disjunction.Disjuncts, not.X)
-			} else {
-				return f, false
+	case *NaryOp:
+		if operator.Op == AndOp {
+			disjunction := NewDisjunction()
+			for _, clause := range operator.Clauses {
+				if not, isNot := clause.(*NotOp); isNot {
+					disjunction.Disjuncts = append(disjunction.Disjuncts, not.X)
+				} else {
+					return f, false
+				}
 			}
+			return Not(disjunction), true
 		}
-		return Not(disjunction), true
 	case *Disjunction:
 		conjunction := NewConjunction()
 		for _, clause := range operator.Disjuncts {
 			if not, isNot := clause.(*NotOp); isNot {
-				conjunction.Conjuncts = append(conjunction.Conjuncts, not.X)
+				conjunction.Clauses = append(conjunction.Clauses, not.X)
 			} else {
 				return f, false
 			}
@@ -109,25 +120,27 @@ func DeMorganContractEager(f LogicNode) (LogicNode, bool) {
 		case OrOp:
 			return Not(And(xOperand, yOperand)), true
 		}
-	case *Conjunction:
-		disjunction := NewDisjunction()
-		for _, clause := range operator.Conjuncts {
-			if not, isNot := clause.(*NotOp); isNot {
-				disjunction.Disjuncts = append(disjunction.Disjuncts, not.X)
-			} else {
-				// apply double negation
-				disjunction.Disjuncts = append(disjunction.Disjuncts, Not(clause))
+	case *NaryOp:
+		if operator.Op == AndOp {
+			disjunction := NewDisjunction()
+			for _, clause := range operator.Clauses {
+				if not, isNot := clause.(*NotOp); isNot {
+					disjunction.Disjuncts = append(disjunction.Disjuncts, not.X)
+				} else {
+					// apply double negation
+					disjunction.Disjuncts = append(disjunction.Disjuncts, Not(clause))
+				}
 			}
+			return Not(disjunction), true
 		}
-		return Not(disjunction), true
 	case *Disjunction:
 		conjunction := NewConjunction()
 		for _, clause := range operator.Disjuncts {
 			if not, isNot := clause.(*NotOp); isNot {
-				conjunction.Conjuncts = append(conjunction.Conjuncts, not.X)
+				conjunction.Clauses = append(conjunction.Clauses, not.X)
 			} else {
 				// apply double negation
-				conjunction.Conjuncts = append(conjunction.Conjuncts, Not(clause))
+				conjunction.Clauses = append(conjunction.Clauses, Not(clause))
 			}
 		}
 		return Not(conjunction), true

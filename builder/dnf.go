@@ -72,17 +72,17 @@ func (b *DnfBuilder) randomLiteral() LogicNode {
 }
 
 // randomConjunction returns a random conjunction (not necessarily satisfiable)
-func (b *DnfBuilder) randomConjunction() *Conjunction {
+func (b *DnfBuilder) randomConjunction() *NaryOp {
 	clauses := make([]LogicNode, 0)
 	for i := 0; i < b.NumClauses; i++ {
 		clauses = append(clauses, b.randomLiteral())
 	}
-	return &Conjunction{Conjuncts: clauses}
+	return NewConjunction(clauses...)
 }
 
 // satConjunction returns a conjunction that is satisfiable, i.e., a conjunction
 // that never contains both a variable and its negation
-func (b *DnfBuilder) satConjunction() *Conjunction {
+func (b *DnfBuilder) satConjunction() *NaryOp {
 	clauses := make([]LogicNode, 0)
 	usedLiterals := make(map[string]bool)
 	for i := 0; i < b.NumClauses; i++ {
@@ -101,17 +101,17 @@ func (b *DnfBuilder) satConjunction() *Conjunction {
 			}
 		}
 	}
-	return &Conjunction{Conjuncts: clauses}
+	return NewConjunction(clauses...)
 }
 
 // unsatConjunction returns a conjunction that is not satisfiable, i.e., a conjunction
 // that contains both a variable and its negation
-func (b *DnfBuilder) unsatConjunction() *Conjunction {
+func (b *DnfBuilder) unsatConjunction() *NaryOp {
 	randVar := b.randomVariable()
 	negatedVar := Not(&Variable{Name: randVar.Name})
 	clauses := []LogicNode{randVar, negatedVar}
 	for i := 0; i < b.NumClauses-2; i++ {
 		clauses = append(clauses, b.randomLiteral())
 	}
-	return &Conjunction{Conjuncts: clauses}
+	return NewConjunction(clauses...)
 }

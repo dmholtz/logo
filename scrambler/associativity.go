@@ -13,15 +13,19 @@ func CombineAnd(f LogicNode) (LogicNode, bool) {
 		switch n := node.(type) {
 		case *BinaryOp:
 			if n.Op == AndOp {
-				conjunction.Conjuncts = append(conjunction.Conjuncts, n.X)
-				conjunction.Conjuncts = append(conjunction.Conjuncts, n.Y)
+				conjunction.Clauses = append(conjunction.Clauses, n.X)
+				conjunction.Clauses = append(conjunction.Clauses, n.Y)
 			} else {
-				conjunction.Conjuncts = append(conjunction.Conjuncts, n)
+				conjunction.Clauses = append(conjunction.Clauses, n)
 			}
-		case *Conjunction:
-			conjunction.Conjuncts = append(conjunction.Conjuncts, n.Conjuncts...)
+		case *NaryOp:
+			if n.Op == AndOp {
+				conjunction.Clauses = append(conjunction.Clauses, n.Clauses...)
+			} else {
+				conjunction.Clauses = append(conjunction.Clauses, n)
+			}
 		default:
-			conjunction.Conjuncts = append(conjunction.Conjuncts, n)
+			conjunction.Clauses = append(conjunction.Clauses, n)
 		}
 	}
 
@@ -32,11 +36,13 @@ func CombineAnd(f LogicNode) (LogicNode, bool) {
 			extendConjunction(operator.Y)
 			return conjunction, true
 		}
-	case *Conjunction:
-		for _, conjunct := range operator.Conjuncts {
-			extendConjunction(conjunct)
+	case *NaryOp:
+		if operator.Op == AndOp {
+			for _, conjunct := range operator.Clauses {
+				extendConjunction(conjunct)
+			}
+			return conjunction, true
 		}
-		return conjunction, true
 	}
 	return f, false
 }
@@ -81,15 +87,15 @@ func CombineOr(f LogicNode) (LogicNode, bool) {
 // SplitNary splits a n-ary conjunction or disjunction into a binary tree of conjunctions or disjunctions.
 func SplitNary(f LogicNode) (LogicNode, bool) {
 	switch operator := f.(type) {
-	case *Conjunction:
-		if len(operator.Conjuncts) > 1 {
-			rest, _ := SplitNary(NewConjunction(operator.Conjuncts[1:]...))
-			return And(operator.Conjuncts[0], rest), true
+	case *NaryOp:
+		if len(operator.Clauses) > 1 {
+			rest, _ := SplitNary(NewConjunction(operator.Clauses[1:]...))
+			return And(operator.Clauses[0], rest), true
 		}
-		if len(operator.Conjuncts) == 1 {
-			return operator.Conjuncts[0], true
+		if len(operator.Clauses) == 1 {
+			return operator.Clauses[0], true
 		}
-		if len(operator.Conjuncts) == 0 {
+		if len(operator.Clauses) == 0 {
 			return Top(), true
 		}
 	case *Disjunction:

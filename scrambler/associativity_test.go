@@ -18,9 +18,9 @@ func TestCombineAnd(t *testing.T) {
 		assert.True(t, ok)
 
 		// assert that the result is a conjunction of correct length
-		conjunction, ok := result.(*Conjunction)
+		conjunction, ok := result.(*NaryOp)
 		assert.True(t, ok)
-		assert.Equal(t, 3, len(conjunction.Conjuncts))
+		assert.Equal(t, 3, len(conjunction.Clauses))
 
 		// assert that the result is equivalent to the original expression
 		assert.True(t, bf.IsEquiv(f, result))
@@ -33,9 +33,9 @@ func TestCombineAnd(t *testing.T) {
 		assert.True(t, ok)
 
 		// assert that the result is a conjunction of correct length
-		conjunction, ok := result.(*Conjunction)
+		conjunction, ok := result.(*NaryOp)
 		assert.True(t, ok)
-		assert.Equal(t, 4, len(conjunction.Conjuncts))
+		assert.Equal(t, 4, len(conjunction.Clauses))
 
 		// assert that the result is equivalent to the original expression
 		assert.True(t, bf.IsEquiv(f, result))
@@ -48,9 +48,9 @@ func TestCombineAnd(t *testing.T) {
 		assert.True(t, ok)
 
 		// assert that the result is a conjunction of correct length
-		conjunction, ok := result.(*Conjunction)
+		conjunction, ok := result.(*NaryOp)
 		assert.True(t, ok)
-		assert.Equal(t, 4, len(conjunction.Conjuncts))
+		assert.Equal(t, 4, len(conjunction.Clauses))
 
 		// assert that the result is equivalent to the original expression
 		assert.True(t, bf.IsEquiv(f, result))
@@ -63,9 +63,9 @@ func TestCombineAnd(t *testing.T) {
 		assert.True(t, ok)
 
 		// assert that the result is a conjunction of correct length
-		conjunction, ok := result.(*Conjunction)
+		conjunction, ok := result.(*NaryOp)
 		assert.True(t, ok)
-		assert.Equal(t, 2, len(conjunction.Conjuncts))
+		assert.Equal(t, 2, len(conjunction.Clauses))
 
 		// assert that the result is equivalent to the original expression
 		assert.True(t, bf.IsEquiv(f, result))
