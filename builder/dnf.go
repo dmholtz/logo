@@ -53,12 +53,12 @@ func (b *DnfBuilder) BuildUnsat() Disjunction {
 }
 
 // randomVariable returns a random logic variable
-func (b *DnfBuilder) randomVariable() Variable {
-	return Variable{Name: b.Scope[rand.Intn(len(b.Scope))]}
+func (b *DnfBuilder) randomVariable() *Variable {
+	return &Variable{Name: b.Scope[rand.Intn(len(b.Scope))]}
 }
 
 // randomNegationWrap randomly wraps a logic variable in a negation
-func (b *DnfBuilder) randomNegationWrap(variable Variable) (LogicNode, bool) {
+func (b *DnfBuilder) randomNegationWrap(variable *Variable) (LogicNode, bool) {
 	if rand.Intn(2) == 0 {
 		return variable, true
 	}
@@ -97,7 +97,7 @@ func (b *DnfBuilder) satConjunction() *Conjunction {
 			if usedPositively {
 				clauses = append(clauses, randVar)
 			} else {
-				clauses = append(clauses, Not(&randVar))
+				clauses = append(clauses, Not(randVar))
 			}
 		}
 	}

@@ -1,6 +1,8 @@
 package scrambler
 
-import . "github.com/dmholtz/logo"
+import (
+	. "github.com/dmholtz/logo"
+)
 
 // CombineAnd combines a tree of nested Ands into a single conjunction by applying the associativity rule.
 // Associativity: (A & B) & C = A & (B & C) = A & B & C
@@ -72,6 +74,35 @@ func CombineOr(f LogicNode) (LogicNode, bool) {
 			extendDisjunction(disjunct)
 		}
 		return disjunction, true
+	}
+	return f, false
+}
+
+// SplitNary splits a n-ary conjunction or disjunction into a binary tree of conjunctions or disjunctions.
+func SplitNary(f LogicNode) (LogicNode, bool) {
+	switch operator := f.(type) {
+	case *Conjunction:
+		if len(operator.Conjuncts) > 1 {
+			rest, _ := SplitNary(NewConjunction(operator.Conjuncts[1:]...))
+			return And(operator.Conjuncts[0], rest), true
+		}
+		if len(operator.Conjuncts) == 1 {
+			return operator.Conjuncts[0], true
+		}
+		if len(operator.Conjuncts) == 0 {
+			return Top(), true
+		}
+	case *Disjunction:
+		if len(operator.Disjuncts) > 1 {
+			rest, _ := SplitNary(NewDisjunction(operator.Disjuncts[1:]...))
+			return Or(operator.Disjuncts[0], rest), true
+		}
+		if len(operator.Disjuncts) == 1 {
+			return operator.Disjuncts[0], true
+		}
+		if len(operator.Disjuncts) == 0 {
+			return Bottom(), true
+		}
 	}
 	return f, false
 }

@@ -154,3 +154,102 @@ func TestCombineOr(t *testing.T) {
 		assert.Equal(t, f, result)
 	})
 }
+
+func TestSplit(t *testing.T) {
+	t.Run("A & B & C is split to (A & (B & C))", func(t *testing.T) {
+		f := NewConjunction(Var("A"), Var("B"), Var("C"))
+
+		// assert that split is successful
+		result, ok := SplitNary(f)
+		assert.True(t, ok)
+
+		// assert that the result is a AND operator
+		andOp, ok := result.(*BinaryOp)
+		assert.True(t, ok)
+		assert.Equal(t, andOp.Op, AndOp)
+
+		// assert that the tree grows to the right
+		andOpRight, ok := andOp.Y.(*BinaryOp)
+		assert.True(t, ok)
+		assert.Equal(t, andOpRight.Op, AndOp)
+
+		// assert that the result is equivalent to the original expression
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("(A&) is split to A", func(t *testing.T) {
+		f := NewConjunction(Var("A"))
+
+		// assert that split is successful
+		result, ok := SplitNary(f)
+		assert.True(t, ok)
+
+		// assert that the result is equivalent to the original expression
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("(&) is split to Top", func(t *testing.T) {
+		f := NewConjunction()
+
+		// assert that split is successful
+		result, ok := SplitNary(f)
+		assert.True(t, ok)
+
+		// assert that the result is Top()
+		assert.Equal(t, Top(), result)
+
+		// assert that the result is equivalent to the original expression
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("A | B | C is split to (A | (B | C))", func(t *testing.T) {
+		f := NewDisjunction(Var("A"), Var("B"), Var("C"))
+
+		// assert that split is successful
+		result, ok := SplitNary(f)
+		assert.True(t, ok)
+
+		// assert that the result is a OR operator
+		orOp, ok := result.(*BinaryOp)
+		assert.True(t, ok)
+		assert.Equal(t, orOp.Op, OrOp)
+
+		// assert that the tree grows to the right
+		orOpRight, ok := orOp.Y.(*BinaryOp)
+		assert.True(t, ok)
+		assert.Equal(t, orOpRight.Op, OrOp)
+
+		// assert that the result is equivalent to the original expression
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("(A|) is split to A", func(t *testing.T) {
+		f := NewDisjunction(Var("A"))
+
+		// assert that split is successful
+		result, ok := SplitNary(f)
+		assert.True(t, ok)
+
+		// assert that the result is equivalent to the original expression
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("(|) is split to Bottom", func(t *testing.T) {
+		f := NewDisjunction()
+
+		// assert that split is successful
+		result, ok := SplitNary(f)
+		assert.True(t, ok)
+
+		// assert that the result is Bottom()
+		assert.Equal(t, Bottom(), result)
+
+		// assert that the result is equivalent to the original expression
+		assert.True(t, bf.IsEquiv(f, result))
+	})
+	t.Run("!A is not split", func(t *testing.T) {
+		f := Not(Var("A"))
+
+		// assert that split is unsuccessful
+		result, ok := SplitNary(f)
+		assert.False(t, ok)
+
+		// assert that the result is the same as the original expression
+		assert.Equal(t, f, result)
+	})
+}
