@@ -29,7 +29,7 @@ func TestRandomConjunction(t *testing.T) {
 	t.Run("conjunction has numClauses", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(3, 2, 2)
 		conjunction := dnfBuilder.randomConjunction()
-		assert.Equal(t, dnfBuilder.NumClauses, len(conjunction.Conjuncts))
+		assert.Equal(t, dnfBuilder.NumClauses, len(conjunction.Clauses))
 	})
 	t.Run("conjunction scope is subset of builder scope", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(3, 2, 4)
@@ -44,7 +44,7 @@ func TestSatConjunction(t *testing.T) {
 	t.Run("conjunction has numClauses", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(3, 2, 2)
 		conjunction := dnfBuilder.randomConjunction()
-		assert.Equal(t, dnfBuilder.NumClauses, len(conjunction.Conjuncts))
+		assert.Equal(t, dnfBuilder.NumClauses, len(conjunction.Clauses))
 	})
 	t.Run("conjunction scope is subset of builder scope", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(3, 2, 4)
@@ -80,7 +80,7 @@ func TestUnsatConjunction(t *testing.T) {
 	t.Run("conjunction has numClauses", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(3, 2, 2)
 		conjunction := dnfBuilder.randomConjunction()
-		assert.Equal(t, dnfBuilder.NumClauses, len(conjunction.Conjuncts))
+		assert.Equal(t, dnfBuilder.NumClauses, len(conjunction.Clauses))
 	})
 	t.Run("conjunction scope is subset of builder scope", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(3, 2, 4)
@@ -107,7 +107,7 @@ func TestSatDnf(t *testing.T) {
 	t.Run("dnf has numConjunctions", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(3, 2, 2)
 		dnf := dnfBuilder.BuildSat()
-		assert.Equal(t, dnfBuilder.NumConjunctions, len(dnf.Disjuncts))
+		assert.Equal(t, dnfBuilder.NumConjunctions, len(dnf.Clauses))
 	})
 	t.Run("dnf scope is subset of builder scope", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(3, 2, 4)
@@ -129,7 +129,7 @@ func TestUnsatDnf(t *testing.T) {
 	t.Run("dnf has numConjunctions", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(3, 2, 2)
 		dnf := dnfBuilder.BuildUnsat()
-		assert.Equal(t, dnfBuilder.NumConjunctions, len(dnf.Disjuncts))
+		assert.Equal(t, dnfBuilder.NumConjunctions, len(dnf.Clauses))
 	})
 	t.Run("dnf scope is subset of builder scope", func(t *testing.T) {
 		dnfBuilder := NewDnfBuilder(3, 2, 4)

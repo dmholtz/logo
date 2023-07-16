@@ -56,12 +56,13 @@ func TestDeMorganExpand(t *testing.T) {
 		result, ok := DeMorganExpand(f)
 		assert.True(t, ok)
 
-		// assert that the result is a disjunction
-		disj, typeOk := result.(*Disjunction)
+		// assert that the result is a n-ary disjunction
+		disj, typeOk := result.(*NaryOp)
 		assert.True(t, typeOk)
+		assert.Equal(t, disj.Op, OrOp)
 
 		// assert that all subnodes are negated
-		for _, subnode := range disj.Disjuncts {
+		for _, subnode := range disj.Clauses {
 			_, typeOk = subnode.(*NotOp)
 			assert.True(t, typeOk)
 		}
@@ -76,12 +77,13 @@ func TestDeMorganExpand(t *testing.T) {
 		result, ok := DeMorganExpand(f)
 		assert.True(t, ok)
 
-		// assert that the result is a conjunction
-		conj, typeOk := result.(*Conjunction)
+		// assert that the result is a n-ary conjunction
+		conj, typeOk := result.(*NaryOp)
 		assert.True(t, typeOk)
+		assert.Equal(t, conj.Op, AndOp)
 
 		// assert that all subnodes are negated
-		for _, subnode := range conj.Conjuncts {
+		for _, subnode := range conj.Clauses {
 			_, typeOk = subnode.(*NotOp)
 			assert.True(t, typeOk)
 		}
@@ -97,8 +99,9 @@ func TestDeMorganExpand(t *testing.T) {
 		assert.True(t, ok)
 
 		// assert that the result is a disjunction
-		_, typeOk := result.(*Disjunction)
+		disj, typeOk := result.(*NaryOp)
 		assert.True(t, typeOk)
+		assert.Equal(t, disj.Op, OrOp)
 
 		// assert that the result is semantically equivalent to the input
 		assert.True(t, bf.IsEquiv(f, result))
@@ -227,9 +230,10 @@ func TestDeMorganContract(t *testing.T) {
 		notOp, isNot := result.(*NotOp)
 		assert.True(t, isNot)
 
-		// assert that argument of the negation is a disjunction
-		_, isDisjunction := notOp.X.(*Disjunction)
+		// assert that argument of the negation is a n-ary disjunction
+		disj, isDisjunction := notOp.X.(*NaryOp)
 		assert.True(t, isDisjunction)
+		assert.Equal(t, OrOp, disj.Op)
 
 		// assert that the result is semantically equivalent to the input
 		assert.True(t, bf.IsEquiv(f, result))
@@ -245,9 +249,10 @@ func TestDeMorganContract(t *testing.T) {
 		notOp, isNot := result.(*NotOp)
 		assert.True(t, isNot)
 
-		// assert that argument of the negation is a conjunction
-		_, isConjunction := notOp.X.(*Conjunction)
+		// assert that argument of the negation is a n-ary conjunction
+		conj, isConjunction := notOp.X.(*NaryOp)
 		assert.True(t, isConjunction)
+		assert.Equal(t, AndOp, conj.Op)
 
 		// assert that the result is semantically equivalent to the input
 		assert.True(t, bf.IsEquiv(f, result))
@@ -344,9 +349,10 @@ func TestDeMorganContractEager(t *testing.T) {
 		notOp, isNot := result.(*NotOp)
 		assert.True(t, isNot)
 
-		// assert that the argument of the negation is a disjunction
-		_, isDisjunction := notOp.X.(*Disjunction)
+		// assert that the argument of the negation is a n-ary disjunction
+		disj, isDisjunction := notOp.X.(*NaryOp)
 		assert.True(t, isDisjunction)
+		assert.Equal(t, disj.Op, OrOp)
 
 		// assert that the result is semantically equivalent to the input
 		assert.True(t, bf.IsEquiv(f, result))
@@ -362,9 +368,10 @@ func TestDeMorganContractEager(t *testing.T) {
 		notOp, isNot := result.(*NotOp)
 		assert.True(t, isNot)
 
-		// assert that the argument of the negation is a conjunction
-		_, isConjunction := notOp.X.(*Conjunction)
+		// assert that the argument of the negation is a n-ary conjunction
+		conj, isConjunction := notOp.X.(*NaryOp)
 		assert.True(t, isConjunction)
+		assert.True(t, conj.Op == AndOp)
 
 		// assert that the result is semantically equivalent to the input
 		assert.True(t, bf.IsEquiv(f, result))

@@ -33,7 +33,7 @@ func TestIsSat(t *testing.T) {
 		for i := 0; i < 32; i++ {
 			clauses = append(clauses, Var(fmt.Sprintf("x%d", i+1)))
 		}
-		conjunction := &Conjunction{Conjuncts: clauses}
+		conjunction := NewConjunction(clauses...)
 		assert.Panics(t, func() { IsSat(conjunction) })
 	})
 
