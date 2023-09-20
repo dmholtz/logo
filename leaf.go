@@ -4,12 +4,12 @@ import "fmt"
 
 type Leaf bool
 
-func Bottom() Leaf {
-	return false
+func Bottom() LogicNode {
+	return Leaf(false)
 }
 
-func Top() Leaf {
-	return true
+func Top() LogicNode {
+	return Leaf(true)
 }
 
 func (l Leaf) Eval(assignment Assignment) bool {
