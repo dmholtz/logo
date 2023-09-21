@@ -10,15 +10,18 @@ type EquivalentFormulaBuilder struct {
 	Appendix    LogicNode
 }
 
-func NewEquivalentFormulaBuilder(numVariables int) *EquivalentFormulaBuilder {
+func NewEquivalentFormulaBuilder(numVariables int, numOperators int) *EquivalentFormulaBuilder {
 	if numVariables < 2 {
 		panic("numVariables must be at least 2")
+	}
+	if numOperators < 2 {
+		panic("size must be at least 2")
 	}
 	scope := BuildScope(numVariables)
 
 	// build a random formula as a base formula
 	rbf := NewRandomFormulaBuilder(numVariables - 1)
-	baseFormula := rbf.Build(6)
+	baseFormula := rbf.Build(numOperators - 1)
 
 	// build a random variable independent of the base formula
 	appendix := Var(scope[len(scope)-1])
