@@ -2,7 +2,6 @@ package scrambler
 
 import (
 	"fmt"
-	"reflect"
 
 	"math/rand"
 
@@ -33,7 +32,7 @@ func Traverse(f LogicNode, transform func(LogicNode) (LogicNode, bool)) LogicNod
 		}
 		return f1
 	default:
-		panic(fmt.Sprintf("Unkown type=%s of subformula=%s", reflect.TypeOf(f1), f1))
+		panic(fmt.Sprintf("Unkown type=%T of subformula=%s", f1, f1))
 	}
 }
 
@@ -66,6 +65,6 @@ func TraverseProbabilistic(f LogicNode, transform func(LogicNode) (LogicNode, bo
 		}
 		return f1
 	default:
-		panic(fmt.Sprintf("Unkown type=%s of subformula=%s", reflect.TypeOf(f1), f1))
+		panic(fmt.Sprintf("Unkown type=%T of subformula=%s", f1, f1))
 	}
 }
