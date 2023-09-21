@@ -1,7 +1,6 @@
 package builder
 
 import (
-	"fmt"
 	"math/rand"
 
 	. "github.com/dmholtz/logo"
@@ -23,10 +22,7 @@ func NewDnfBuilder(numVariables int, numConjunctions, numClauses int) *DnfBuilde
 	if numClauses < 2 {
 		panic("non-trivial conjunction must have at least to clauses")
 	}
-	scope := make([]string, numVariables)
-	for i := 0; i < numVariables; i++ {
-		scope[i] = fmt.Sprintf("x%d", i+1)
-	}
+	scope := BuildScope(numVariables)
 	return &DnfBuilder{
 		Scope:           scope,
 		NumConjunctions: numConjunctions,
